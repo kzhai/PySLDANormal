@@ -5,7 +5,7 @@ PySLDA is a supervised Latent Dirichlet Allocation topic modeling package.
 
 Please download the latest version from our [GitHub repository](https://github.com/kzhai/PySLDA).
 
-Please send any bugs of problems to Ke Zhai (kzhai@umd.edu).
+Please send any bugs or problems to Ke Zhai (kzhai@umd.edu).
 
 Install and Build
 ----------
