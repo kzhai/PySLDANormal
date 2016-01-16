@@ -1,5 +1,5 @@
 """
-VariationalBayes for Vanilla LDA
+VariationalBayes for Supervised LDA
 @author: Ke Zhai (zhaike@cs.umd.edu)
 """
 
@@ -18,7 +18,7 @@ from inferencer import Inferencer;
 This is a python implementation of supervised lda, based on variational inference, with hyper parameter updating.
 
 References:
-[1] McAuliffe Jon D., Blei David M. Supervised topic models. In Advances in Neural Information Processing Systems, 2008
+[1] Blei David M., McAuliffe Jon D., Supervised topic models. In Advances in Neural Information Processing Systems, 2008
 """
 
 class VariationalBayes(Inferencer):
