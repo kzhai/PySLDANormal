@@ -71,9 +71,9 @@ class MonteCarlo(Inferencer):
         self._k_dn = {}
 
         for doc_id in xrange(len(word_idss)):
-            self._k_dn[doc_id] = numpy.zeros(len(self._parsed_corpus[doc_id]));
+            self._k_dn[doc_id] = numpy.zeros(len(word_idss[doc_id]));
             for word_pos in xrange(len(word_idss[doc_id])):
-                type_index = self._parsed_corpus[doc_id][word_pos];
+                type_index = word_idss[doc_id][word_pos];
                 topic_index = numpy.random.randint(self._number_of_topics);
                 
                 self._k_dn[doc_id][word_pos] = topic_index;
