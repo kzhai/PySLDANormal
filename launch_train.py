@@ -136,7 +136,7 @@ def main():
     # create output directory
     now = datetime.datetime.now();
     suffix = now.strftime("%y%m%d-%H%M%S") + "";
-    suffix += "-%s" % ("lda");
+    suffix += "-%s" % ("slda");
     suffix += "-I%d" % (training_iterations);
     suffix += "-S%d" % (snapshot_interval);
     suffix += "-K%d" % (number_of_topics);
