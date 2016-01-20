@@ -1,7 +1,7 @@
 PySLDANormal
 ==========
 
-PySLDANormal is a supervised Latent Dirichlet Allocation topic modeling package.
+PySLDANormal is a supervised Latent Dirichlet Allocation topic modeling package for regression.
 
 Please download the latest version from our [GitHub repository](https://github.com/kzhai/PySLDANormal).
 
