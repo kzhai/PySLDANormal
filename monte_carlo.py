@@ -79,41 +79,6 @@ class MonteCarlo(Inferencer):
                 self._n_dk[doc_id, topic_index] += 1;
                 self._n_kv[topic_index, type_index] += 1;
                 self._n_k[topic_index] += 1;
-    
-    '''
-    def heldoutSampling(self, max_iter, heldout):
-        h_doc_topics = list()
-        h_doc_topic_sum = np.zeros([len(heldout), self._number_of_topics]) + self._alpha_alpha
-
-        for di in xrange(len(heldout)):
-            doc = heldout[di]
-            topics = np.random.randint(self._number_of_topics, size=len(doc))
-            h_doc_topics.append(topics)
-
-            for wi in xrange(len(doc)):
-                topic = topics[wi]
-                word = doc[wi]
-                h_doc_topic_sum[di, topic] += 1
-
-        for iteration in xrange(max_iter):
-            for di in xrange(len(heldout)):
-                doc = heldout[di]
-                for wi in xrange(len(doc)):
-                    word = doc[wi]
-                    old_topic = h_doc_topics[di][wi]
-
-                    h_doc_topic_sum[di, old_topic] -= 1
-
-                    # update
-                    prob = (self._n_kv[word, :]) / (self._n_k[:]) * (self._n_dk[di, :])
-
-                    new_topic = sampling_from_dist(prob)
-
-                    h_doc_topics[di][wi] = new_topic
-                    h_doc_topic_sum[di, new_topic] += 1
-
-        return h_doc_topic_sum
-    '''
 
     """
     this method samples the word at position in document, by covering that word and compute its new topic distribution, in the end, both self._k_dn, self._n_dk and self._n_kv will change
