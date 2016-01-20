@@ -1,5 +1,4 @@
 """
-@author: Jordan Boyd-Graber (jbg@umiacs.umd.edu)
 @author: Ke Zhai (zhaike@cs.umd.edu)
 """
 
@@ -198,7 +197,6 @@ class MonteCarlo(Inferencer):
     def log_likelihood(self, alpha_alpha, alpha_beta):
         """
         likelihood function
-        does not contain normal distribution part
         """
         assert self._n_dk.shape == (self._number_of_documents, self._number_of_topics);
         assert alpha_alpha.shape == (self._number_of_topics,);
