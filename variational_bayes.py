@@ -189,6 +189,8 @@ class VariationalBayes(Inferencer):
                         assert log_phi_j.shape == (self._number_of_topics,);
                         
                         log_phi[term_pos, :] = log_phi_j;
+                        
+                        # TODO: in an ideal case, we can also update gamma after each update on log_phi_j
                     
                 gamma_update = self._alpha_alpha + numpy.array(numpy.sum(numpy.exp(log_phi), axis=0));
                 
@@ -289,7 +291,7 @@ class VariationalBayes(Inferencer):
         joint_log_likelihood = document_log_likelihood + topic_log_likelihood;
         
         print "e_step and m_step of iteration %d finished in %d and %d seconds respectively with log likelihood %g" % (self._counter, clock_e_step, clock_m_step, joint_log_likelihood)
-        #print self._eta
+        # print self._eta
         
         return joint_log_likelihood
     
