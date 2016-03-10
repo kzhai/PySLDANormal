@@ -69,7 +69,7 @@ class VariationalBayes(Inferencer):
                parsed_corpus_response=None,
                local_parameter_iteration=10,
                local_parameter_converge_threshold=1e-6,
-               approximate_phi=True):
+               approximate_phi=False):
         
         if parsed_corpus_response == None:
             word_idss = self._parsed_corpus;
@@ -152,7 +152,16 @@ class VariationalBayes(Inferencer):
                     # log_phi -= phi_normalizer;
                     log_phi -= scipy.misc.logsumexp(log_phi, axis=1)[:, numpy.newaxis];
                     assert log_phi.shape == (len(term_ids), self._number_of_topics);
+                    
+                    gamma_update = self._alpha_alpha + numpy.array(numpy.sum(numpy.exp(log_phi), axis=0));
+                
+                    mean_change = numpy.mean(abs(gamma_update - gamma_values[doc_id, :]));
+                    gamma_values[doc_id, :] = gamma_update;
+                    if mean_change <= local_parameter_converge_threshold:
+                        break;
                 else:
+                    old_gamma_values = gamma_values[doc_id, :].copy();
+                    
                     # assert phi.shape == (len(term_ids), self._number_of_topics);
                     for term_pos in xrange(len(term_ids)):
                         term_id = term_ids[term_pos];
@@ -190,15 +199,21 @@ class VariationalBayes(Inferencer):
                         
                         log_phi[term_pos, :] = log_phi_j;
                         
-                        # TODO: in an ideal case, we can also update gamma after each update on log_phi_j
+                        gamma_values[doc_id, :] = self._alpha_alpha + numpy.array(numpy.sum(numpy.exp(log_phi), axis=0));
+                    mean_change = numpy.mean(abs(gamma_values[doc_id, :] - old_gamma_values));
+                    if mean_change <= local_parameter_converge_threshold:
+                        break;
                     
+                '''
+                # TODO: We could also update the gamma after all phi updates.
                 gamma_update = self._alpha_alpha + numpy.array(numpy.sum(numpy.exp(log_phi), axis=0));
                 
                 mean_change = numpy.mean(abs(gamma_update - gamma_values[doc_id, :]));
                 gamma_values[doc_id, :] = gamma_update;
                 if mean_change <= local_parameter_converge_threshold:
                     break;
-            
+                '''
+                        
             phi = numpy.exp(log_phi);
             assert phi.shape == (len(term_ids), self._number_of_topics);
             phi_mean = numpy.mean(phi, axis=0)
