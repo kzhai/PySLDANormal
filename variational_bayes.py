@@ -141,8 +141,9 @@ class VariationalBayes(Inferencer):
                     
                     assert self._eta.shape == (1, self._number_of_topics);
                     
-                    log_phi += ((responses[doc_id] / (total_word_count * self._sigma_square)) * self._eta)
-                    assert log_phi.shape == (len(term_ids), self._number_of_topics);
+                    # Note: the following term will be ignored during normalization
+                    # log_phi += ((responses[doc_id] / (total_word_count * self._sigma_square)) * self._eta)
+                    # assert log_phi.shape == (len(term_ids), self._number_of_topics);
                     
                     log_phi -= (numpy.dot(phi_sum_j, self._eta.T) * self._eta + 0.5 * (self._eta ** 2)) / ((numpy.float(total_word_count) ** 2.) * self._sigma_square)
                     assert log_phi.shape == (len(term_ids), self._number_of_topics);
@@ -185,8 +186,9 @@ class VariationalBayes(Inferencer):
                         
                         assert self._eta.shape == (1, self._number_of_topics);
                         
-                        log_phi_j += ((responses[doc_id] / (total_word_count * self._sigma_square)) * self._eta[0, :])
-                        assert log_phi_j.shape == (self._number_of_topics,);
+                        # Note: the following term will be ignored during normalization
+                        #log_phi_j += ((responses[doc_id] / (total_word_count * self._sigma_square)) * self._eta[0, :])
+                        #assert log_phi_j.shape == (self._number_of_topics,);
                         
                         log_phi_j -= (numpy.sum(phi_sum_j * self._eta[0, :]) * self._eta[0, :] + 0.5 * (self._eta[0, :] ** 2)) / ((numpy.float(total_word_count) ** 2.) * self._sigma_square)
                         assert log_phi_j.shape == (self._number_of_topics,);
@@ -220,17 +222,17 @@ class VariationalBayes(Inferencer):
             assert phi_mean.shape == (self._number_of_topics,);
             
             # Note: all terms including E_q[p(\theta | \_alpha_alpha)], i.e., terms involving \Psi(\gamma), are cancelled due to \gamma updates in E-step
-            
-            # compute the _alpha_alpha terms
-            document_log_likelihood += scipy.special.gammaln(numpy.sum(self._alpha_alpha)) - numpy.sum(scipy.special.gammaln(self._alpha_alpha))
-            # compute the gamma terms
-            document_log_likelihood += numpy.sum(scipy.special.gammaln(gamma_values[doc_id, :])) - scipy.special.gammaln(numpy.sum(gamma_values[doc_id, :]));
-            # compute the phi terms
-            document_log_likelihood -= numpy.sum(phi * log_phi);
-            # compute the eta terms
-            document_log_likelihood -= 0.5 * numpy.log(2 * numpy.pi * self._sigma_square)
-            document_log_likelihood -= 0.5 * (responses[doc_id] ** 2 - 2 * responses[doc_id] * numpy.sum(self._eta[0, :] * phi_mean) + numpy.dot(numpy.dot(self._eta, numpy.dot(phi_mean[:, numpy.newaxis], phi_mean[numpy.newaxis, :])), self._eta.T)) / self._sigma_square
-            
+            if parsed_corpus_response == None:
+                # compute the _alpha_alpha terms
+                document_log_likelihood += scipy.special.gammaln(numpy.sum(self._alpha_alpha)) - numpy.sum(scipy.special.gammaln(self._alpha_alpha))
+                # compute the gamma terms
+                document_log_likelihood += numpy.sum(scipy.special.gammaln(gamma_values[doc_id, :])) - scipy.special.gammaln(numpy.sum(gamma_values[doc_id, :]));
+                # compute the phi terms
+                document_log_likelihood -= numpy.sum(phi * log_phi);
+                # compute the eta terms
+                document_log_likelihood -= 0.5 * numpy.log(2 * numpy.pi * self._sigma_square)
+                document_log_likelihood -= 0.5 * (responses[doc_id] ** 2 - 2 * responses[doc_id] * numpy.sum(self._eta[0, :] * phi_mean) + numpy.dot(numpy.dot(self._eta, numpy.dot(phi_mean[:, numpy.newaxis], phi_mean[numpy.newaxis, :])), self._eta.T)) / self._sigma_square
+                
             # Note: all terms including E_q[p(\_eta | \_beta)], i.e., terms involving \Psi(\_eta), are cancelled due to \_eta updates in M-step
             if parsed_corpus_response != None:
                 # compute the p(w_{dn} | z_{dn}, \_eta) terms, which will be cancelled during M-step during training
@@ -249,7 +251,7 @@ class VariationalBayes(Inferencer):
                 print "successfully processed %d documents..." % (doc_id + 1);
             
         # compute mean absolute error
-        #mean_absolute_error = numpy.abs(numpy.dot(E_A_sufficient_statistics, self._eta.T) - responses[:, numpy.newaxis]).sum()
+        # mean_absolute_error = numpy.abs(numpy.dot(E_A_sufficient_statistics, self._eta.T) - responses[:, numpy.newaxis]).sum()
         
         if parsed_corpus_response == None:
             self._gamma = gamma_values;
@@ -317,7 +319,7 @@ class VariationalBayes(Inferencer):
         words_log_likelihood, corpus_gamma_values, predicted_responses = self.e_step(parsed_corpus_responses);
         
         parsed_corpus, parsed_responses = parsed_corpus_responses;
-        if parsed_responses!=None:
+        if parsed_responses != None:
             mean_absolute_error = numpy.abs(predicted_responses - parsed_responses[:, numpy.newaxis]).sum()
             print "mean absolute error:", mean_absolute_error;
         clock_e_step = time.time() - clock_e_step;
