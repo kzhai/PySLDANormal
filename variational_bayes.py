@@ -249,7 +249,7 @@ class VariationalBayes(Inferencer):
                 print "successfully processed %d documents..." % (doc_id + 1);
             
         # compute mean absolute error
-        mean_absolute_error = numpy.abs(numpy.dot(E_A_sufficient_statistics, self._eta.T) - responses[:, numpy.newaxis]).sum()
+        #mean_absolute_error = numpy.abs(numpy.dot(E_A_sufficient_statistics, self._eta.T) - responses[:, numpy.newaxis]).sum()
         
         if parsed_corpus_response == None:
             self._gamma = gamma_values;
@@ -311,14 +311,18 @@ class VariationalBayes(Inferencer):
         return joint_log_likelihood
     
     def inference(self, corpus):
-        parsed_corpus, responses = self.parse_data(corpus);
+        parsed_corpus_responses = self.parse_data(corpus);
         
         clock_e_step = time.time();
-        words_log_likelihood, corpus_gamma_values, predicted_responses = self.e_step(parsed_corpus);
-        mean_absolute_error = numpy.abs(predicted_responses - responses[:, numpy.newaxis]).sum()
+        words_log_likelihood, corpus_gamma_values, predicted_responses = self.e_step(parsed_corpus_responses);
+        
+        parsed_corpus, parsed_responses = parsed_corpus_responses;
+        if parsed_responses!=None:
+            mean_absolute_error = numpy.abs(predicted_responses - parsed_responses[:, numpy.newaxis]).sum()
+            print "mean absolute error:", mean_absolute_error;
         clock_e_step = time.time() - clock_e_step;
         
-        return words_log_likelihood, corpus_gamma_values
+        return words_log_likelihood, corpus_gamma_values, predicted_responses
     
     """
     @param alpha_vector: a dict data type represents dirichlet prior, indexed by topic_id

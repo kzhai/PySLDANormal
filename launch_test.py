@@ -92,7 +92,7 @@ def evaluate_snapshot(input_snapshot_path, test_docs, output_gamma_path):
     slda_inferencer = cPickle.load(open(input_snapshot_path, "rb" ));
     #print 'successfully load model snapshot %s...' % (os.path.abspath(input_snapshot_path));
     
-    log_likelihood, gamma_values = slda_inferencer.inference(test_docs);
+    log_likelihood, gamma_values, predictions = slda_inferencer.inference(test_docs);
     print "held-out likelihood of snapshot %s is %g" % (os.path.abspath(input_snapshot_path), log_likelihood);
     numpy.savetxt(output_gamma_path, gamma_values);
 

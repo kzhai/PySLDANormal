@@ -65,6 +65,7 @@ class Hybrid(VariationalBayes, Inferencer):
         assert E_log_beta.shape == (self._number_of_topics, self._number_of_types);
         if parsed_corpus_response != None:
             E_log_prob_eta = E_log_beta - scipy.misc.logsumexp(E_log_beta, axis=1)[:, numpy.newaxis]
+            assert E_log_prob_eta.shape == (self._number_of_topics, self._number_of_types);
         exp_E_log_beta = numpy.exp(E_log_beta);
 
         for doc_id in xrange(number_of_documents):
@@ -118,21 +119,22 @@ class Hybrid(VariationalBayes, Inferencer):
             # Note: all terms including E_q[p(\theta|\alpha)], i.e., terms involving \Psi(\gamma), are cancelled due to \gamma updates
             # Note: all terms including E_q[p(\eta | \beta)], i.e., terms involving \Psi(\eta), are cancelled due to \eta updates in M-step
             
-            # compute the alpha terms
-            document_log_likelihood += scipy.special.gammaln(numpy.sum(self._alpha_alpha)) - numpy.sum(scipy.special.gammaln(self._alpha_alpha))
-            # compute the gamma terms
-            document_log_likelihood += numpy.sum(scipy.special.gammaln(gamma_values[doc_id, :])) - scipy.special.gammaln(numpy.sum(gamma_values[doc_id, :]));
-            # compute the phi terms
-            document_log_likelihood -= numpy.sum(numpy.log(document_phi) * document_phi);
-
-            # compute the eta terms
-            document_log_likelihood -= 0.5 * numpy.log(2 * numpy.pi * self._sigma_square)
-            document_log_likelihood -= 0.5 * (responses[doc_id] ** 2 - 2 * responses[doc_id] * numpy.sum(self._eta[0, :] * phi_mean) + numpy.dot(numpy.dot(self._eta, numpy.dot(phi_mean[:, numpy.newaxis], phi_mean[numpy.newaxis, :])), self._eta.T)) / self._sigma_square
-            
+            if parsed_corpus_response == None:
+                # compute the alpha terms
+                document_log_likelihood += scipy.special.gammaln(numpy.sum(self._alpha_alpha)) - numpy.sum(scipy.special.gammaln(self._alpha_alpha))
+                # compute the gamma terms
+                document_log_likelihood += numpy.sum(scipy.special.gammaln(gamma_values[doc_id, :])) - scipy.special.gammaln(numpy.sum(gamma_values[doc_id, :]));
+                # compute the phi terms
+                document_log_likelihood -= numpy.sum(numpy.log(document_phi) * document_phi);
+    
+                # compute the eta terms
+                document_log_likelihood -= 0.5 * numpy.log(2 * numpy.pi * self._sigma_square)
+                document_log_likelihood -= 0.5 * (responses[doc_id] ** 2 - 2 * responses[doc_id] * numpy.sum(self._eta[0, :] * phi_mean) + numpy.dot(numpy.dot(self._eta, numpy.dot(phi_mean[:, numpy.newaxis], phi_mean[numpy.newaxis, :])), self._eta.T)) / self._sigma_square
+                
             # Note: all terms including E_q[p(\_eta | \_beta)], i.e., terms involving \Psi(\_eta), are cancelled due to \_eta updates in M-step
             if parsed_corpus_response != None:
                 # compute the p(w_{dn} | z_{dn}, \_eta) terms, which will be cancelled during M-step during training
-                words_log_likelihood += numpy.sum(phi.T * E_log_prob_eta[:, word_idss[doc_id]]);
+                words_log_likelihood += numpy.sum(phi * E_log_prob_eta[:, word_idss[doc_id]]);
             
             E_A_sufficient_statistics[doc_id, :] = phi_mean;
             E_AA_sufficient_statistics += numpy.dot(phi_mean[:, numpy.newaxis], phi_mean[numpy.newaxis, :])
@@ -143,7 +145,7 @@ class Hybrid(VariationalBayes, Inferencer):
         phi_sufficient_statistics /= (number_of_samples - burn_in_samples);
         
         # compute mean absolute error
-        mean_absolute_error = numpy.abs(numpy.dot(E_A_sufficient_statistics, self._eta.T) - responses[:, numpy.newaxis]).sum()
+        # mean_absolute_error = numpy.abs(numpy.dot(E_A_sufficient_statistics, self._eta.T) - responses[:, numpy.newaxis]).sum()
         
         if parsed_corpus_response == None:
             self._gamma = gamma_values;
